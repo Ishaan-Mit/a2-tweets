@@ -9,13 +9,23 @@ class Tweet {
 
 	//returns either 'live_event', 'achievement', 'completed_event', or 'miscellaneous'
     get source():string {
-        //TODO: identify whether the source is a live event, an achievement, a completed event, or miscellaneous.
-        return "unknown";
+        if (this.text.startsWith("Just completed") || this.text.startsWith("Just posted")) {
+            return "completed_event";
+        }
+        else if (this.text.startsWith("Watch my ") && this.text.includes("@Runkeeper Live")) {
+            return "live_event";
+        }
+        else if (this.text.includes("set a goal") || this.text.includes("Achieved a new personal record")) {
+            return "achievement";
+        }
+        return "miscellaneous";
     }
 
     //returns a boolean, whether the text includes any content written by the person tweeting.
     get written():boolean {
-        //TODO: identify whether the tweet is written
+        if (this.source == "completed_event" && this.text.includes(" - ")) {
+            return true;
+        }
         return false;
     }
 
@@ -23,8 +33,14 @@ class Tweet {
         if(!this.written) {
             return "";
         }
-        //TODO: parse the written text from the tweet
-        return "";
+        const start:number = this.text.indexOf(" - ");
+        const end:number = this.text.indexOf(" https");
+        
+        if (start == -1 || end == -1 || start >= end) {
+            return "";
+        }
+        
+        return this.text.substring(start+3, end);
     }
 
     get activityType():string {
@@ -32,6 +48,11 @@ class Tweet {
             return "unknown";
         }
         //TODO: parse the activity type from the text of the tweet
+        const ind:number = this.text.indexOf("km") + this.text.indexOf("mi") + 1;
+
+        if (this.text.indexOf("km") + this.text.indexOf("mi")) {
+
+        }
         return "";
     }
 
@@ -39,6 +60,9 @@ class Tweet {
         if(this.source != 'completed_event') {
             return 0;
         }
+        const ind:number = this.text.indexOf("km") + this.text.indexOf("mi") + 1;
+
+
         //TODO: prase the distance from the text of the tweet
         return 0;
     }
