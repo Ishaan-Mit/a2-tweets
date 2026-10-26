@@ -23,48 +23,63 @@ class Tweet {
 
     //returns a boolean, whether the text includes any content written by the person tweeting.
     get written():boolean {
-        if (this.source == "completed_event" && this.text.includes(" - ")) {
-            return true;
-        }
-        return false;
+        return this.writtenText.length > 0;
     }
 
+
     get writtenText():string {
-        if(!this.written) {
+        if (this.source != "completed_event") {
             return "";
         }
-        const start:number = this.text.indexOf(" - ");
-        const end:number = this.text.indexOf(" https");
-        
-        if (start == -1 || end == -1 || start >= end) {
+
+        const linkStart: number = this.text.indexOf(" https:");
+        const dash: number = this.text.indexOf(" - ");
+
+        if (linkStart == -1 || dash == -1) {
             return "";
         }
-        
-        return this.text.substring(start+3, end);
+     
+        return this.text.substring(dash, linkStart);
     }
 
     get activityType():string {
         if (this.source != 'completed_event') {
             return "unknown";
         }
-        //TODO: parse the activity type from the text of the tweet
-        const ind:number = this.text.indexOf("km") + this.text.indexOf("mi") + 1;
+            
+        const kmIdx: number = this.text.indexOf(" km ");
+        const miIdx: number = this.text.indexOf(" mi ");
 
-        if (this.text.indexOf("km") + this.text.indexOf("mi")) {
-
+        if (kmIdx == -1 && miIdx -1) {
+            return "unknown";
         }
-        return "";
+        
+        const start: number = kmIdx > -1 ? kmIdx + 4 : miIdx + 4;
+
+        return this.text.substring(start)
+            .split(" with")[0]
+            .split(" - ")[0]
+            .split(" https")[0]
+            .split(".")[0]
+            .trim()
+            .toLowerCase();
     }
 
     get distance():number {
         if(this.source != 'completed_event') {
             return 0;
         }
-        const ind:number = this.text.indexOf("km") + this.text.indexOf("mi") + 1;
+        
+        const index: number = Math.max(this.text.indexOf(" km "), this.text.indexOf(" mi "));
 
+        const words: string[] = this.text.substring(0, index).split(" ");
+        const value: number = parseFloat(words[words.length-1]);
 
-        //TODO: prase the distance from the text of the tweet
-        return 0;
+        if (this.text.indexOf("km") > 0) {
+            return value / 1.609
+        }
+        
+        return value;
     }
 
     getHTMLTableRow(rowNumber:number):string {
