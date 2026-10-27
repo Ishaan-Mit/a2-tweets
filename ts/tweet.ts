@@ -82,8 +82,24 @@ class Tweet {
         return value;
     }
 
-    getHTMLTableRow(rowNumber:number):string {
-        //TODO: return a table row which summarizes the tweet with a clickable link to the RunKeeper activity
-        return "<tr></tr>";
+    getHTMLTableRow(rowNumber: number): string {
+        const linkStart: number = this.text.indexOf("http");
+
+        // no link in the tweet, so just show the text
+        if (linkStart == -1) {
+            return "<tr><td>" + rowNumber + "</td><td>" + this.activityType + "</td><td>" + this.text + "</td></tr>";
+        }
+
+        // split the tweet into the text before the link, the link, and anything after
+        const spaceAfterLink: number = this.text.indexOf(" ", linkStart);
+        const linkEnd: number = spaceAfterLink == -1 ? this.text.length : spaceAfterLink;
+
+        const before: string = this.text.substring(0, linkStart);
+        const link: string = this.text.substring(linkStart, linkEnd);
+        const after: string = this.text.substring(linkEnd);
+
+        const tweetHTML: string = before + '<a href="' + link + '" target="_blank">' + link + '</a>' + after;
+
+        return "<tr><td>" + rowNumber + "</td><td>" + this.activityType + "</td><td>" + tweetHTML + "</td></tr>";
     }
 }
